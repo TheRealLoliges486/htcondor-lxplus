@@ -33,6 +33,7 @@ sub = htcondor.Submit(
         "log": join(jobDir, "condor.log"),
         "output": join(jobDir, "condor.out"),
         "error": join(jobDir, "condor.err"),
+        "output_destination": jobDir,
         "getenv": "True",
         "request_cpus": str(job_properties["threads"]),
     }
@@ -60,7 +61,7 @@ if runtime is not None:
    sub["+MaxRuntime"] = str(runtime*60) # convert minutes to seconds    
 
 schedd = htcondor.Schedd()
-clusterID = schedd.submit(sub)
+clusterID = schedd.submit(sub, spool=True) # On EOS, we need to spool the jobs https://batchdocs.web.cern.ch/troubleshooting/eos.html
 
 # print jobid for use in Snakemake
 print("{}_{}_{}".format(job_properties["jobid"], UUID, clusterID))
